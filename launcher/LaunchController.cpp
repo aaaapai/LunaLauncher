@@ -133,8 +133,6 @@ LaunchDecision LaunchController::decideLaunchMode()
         }
     }
 
-    const auto* accounts = APPLICATION->accounts();
-
     // Luna feature support: allow third-party auth accounts to launch directly in explicit test builds.
     MinecraftAccountPtr accountToCheck = m_accountToUse;
 
