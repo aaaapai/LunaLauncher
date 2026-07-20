@@ -100,23 +100,6 @@ void LaunchController::decideAccount()
         m_accountToUse = accounts->at(instanceAccountIndex);
     }
 
-    if (!accounts->anyAccountIsValid()) {
-        // Tell the user they need to log in at least one account in order to play.
-        auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
-                                                  tr("In order to play Minecraft, you must have at least one Microsoft "
-                                                     "account which owns Minecraft logged in. "
-                                                     "Would you like to open the account manager to add an account now?"),
-                                                  QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)
-                         ->exec();
-
-        if (reply == QMessageBox::Yes) {
-            // Open the account manager.
-            APPLICATION->ShowGlobalSettings(m_parentWidget, "accounts");
-        } else if (reply == QMessageBox::No) {
-            // Do not open "profile select" dialog.
-            return;
-        }
-    }
 
     if (!m_accountToUse) {
         // If no default account is set, ask the user which one to use.
@@ -143,7 +126,7 @@ LaunchDecision LaunchController::decideLaunchMode()
     }
 
     if (m_wantedLaunchMode == LaunchMode::Normal) {
-        if (m_accountToUse->shouldRefresh() || m_accountToUse->accountState() == AccountState::Offline) {
+        if (m_accountToUse->shouldRefresh()) {
             // Force account refresh on the account used to launch the instance updating the AccountState
             // only on first try and if it is not meant to be offline
             m_accountToUse->refresh();
@@ -152,24 +135,8 @@ LaunchDecision LaunchController::decideLaunchMode()
 
     const auto* accounts = APPLICATION->accounts();
 
-#ifdef LAUNCHER_DISABLE_OWNERSHIP_CHECK
     // Luna feature support: allow third-party auth accounts to launch directly in explicit test builds.
     MinecraftAccountPtr accountToCheck = m_accountToUse;
-#else
-    MinecraftAccountPtr accountToCheck;
-    if (m_accountToUse->ownsMinecraft()) {
-        accountToCheck = m_accountToUse;
-    } else if (const auto defaultAccount = accounts->defaultAccount(); defaultAccount && defaultAccount->ownsMinecraft()) {
-        accountToCheck = defaultAccount;
-    } else {
-        for (int i = 0; i < accounts->count(); i++) {
-            if (const auto account = accounts->at(i); account->ownsMinecraft()) {
-                accountToCheck = account;
-                break;
-            }
-        }
-    }
-#endif
 
     if (!accountToCheck) {
         m_actualLaunchMode = LaunchMode::Demo;
