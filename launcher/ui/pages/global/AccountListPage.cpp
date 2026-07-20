@@ -97,20 +97,6 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
         ui->actionAddMicrosoft->setToolTip(tr("No Microsoft Authentication client ID was set."));
     }
 
-#ifdef DEVELOPER_MODE_ENABLED
-    // Show developer mode warning at the top of the list
-    ui->listView->setEmptyString(
-        tr("<html><head/><body>"
-           "<h2 style='color: red;'>⚠️ DEVELOPER BUILD - FOR TESTING ONLY</h2>"
-           "<p style='color: red;'><b>You are using a developer version with ownership checks disabled.</b></p>"
-           "<p style='color: red;'>Please ensure you are a developer and have already purchased the game.</p>"
-           "<p style='color: red;'>If you have not purchased Minecraft, please delete this launcher immediately.</p>"
-           "</body></html>"));
-
-    // Show the forced add offline button
-    ui->actionAddOfflineForced->setVisible(true);
-    ui->actionAddOfflineForced->setToolTip(tr("Developer mode: Add offline account without Microsoft account verification"));
-#endif
 }
 
 AccountListPage::~AccountListPage()
@@ -165,9 +151,6 @@ void AccountListPage::on_actionAddOffline_triggered()
 {
 
     ChooseOfflineNameDialog dialog(tr("Please enter your desired username to add your offline account."), this);
-    if (dialog.exec() != QDialog::Accepted) {
-        return;
-    }
 
     if (const MinecraftAccountPtr account = MinecraftAccount::createOffline(dialog.getUsername())) {
         account->login()->start();  // The task will complete here.
@@ -181,12 +164,8 @@ void AccountListPage::on_actionAddOffline_triggered()
 // Developer mode function - always defined for moc, but only callable when developer mode is enabled
 void AccountListPage::on_actionAddOfflineForced_triggered()
 {
-#ifdef DEVELOPER_MODE_ENABLED
 
     ChooseOfflineNameDialog dialog(tr("Please enter your desired username to add your offline account."), this);
-    if (dialog.exec() != QDialog::Accepted) {
-        return;
-    }
 
     if (const MinecraftAccountPtr account = MinecraftAccount::createOffline(dialog.getUsername())) {
         account->login()->start();  // The task will complete here.
@@ -195,10 +174,7 @@ void AccountListPage::on_actionAddOfflineForced_triggered()
             m_accounts->setDefaultAccount(account);
         }
     }
-#else
-    // This should never be called in non-developer mode since the button is hidden
-    qWarning("on_actionAddOfflineForced_triggered called in non-developer mode!");
-#endif
+
 }
 
 void AccountListPage::on_actionAddYggdrasil_triggered()
