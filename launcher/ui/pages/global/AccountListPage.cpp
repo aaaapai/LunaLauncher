@@ -163,46 +163,6 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
 
 void AccountListPage::on_actionAddOffline_triggered()
 {
-    if (!m_accounts->anyAccountIsValid()) {
-#ifdef DEVELOPER_MODE_ENABLED
-        // Developer mode: Show warning with option to force add
-        QMessageBox developerMsg(this);
-        developerMsg.setIcon(QMessageBox::Warning);
-        developerMsg.setWindowTitle(tr("Developer Mode Warning"));
-        developerMsg.setTextFormat(Qt::RichText);
-        developerMsg.setText(
-            tr("<html><head/><body>"
-               "<h2 style='color: red;'>⚠️ DEVELOPER BUILD - FOR TESTING ONLY</h2>"
-               "<p style='color: red;'><b>You are using a developer version with ownership checks disabled.</b></p>"
-               "<p>Normally, you must add a Microsoft account that owns Minecraft before you can add an offline account.</p>"
-               "<p>By proceeding, you confirm that:</p>"
-               "<ul>"
-               "<li>You are a developer testing this launcher</li>"
-               "<li>You have already purchased a legitimate copy of Minecraft</li>"
-               "<li>This build is for testing purposes only</li>"
-               "</ul>"
-               "<p style='color: red;'>If you have not purchased Minecraft, please cancel and delete this launcher immediately.</p>"
-               "</body></html>")
-        );
-
-        developerMsg.addButton(tr("Force Add (Developer)"), QMessageBox::ActionRole);
-        QPushButton* cancelButton = developerMsg.addButton(QMessageBox::Cancel);
-        developerMsg.setDefaultButton(cancelButton);
-        developerMsg.exec();
-
-        if (developerMsg.clickedButton() == cancelButton) {
-            return;
-        }
-        // User clicked Force Add - proceed to add offline account
-#else
-        // Normal mode: Show error requiring Microsoft account
-        QMessageBox::warning(this, tr("Error"),
-                             tr("You must add a Microsoft account that owns Minecraft before you can add an offline account."
-                                "<br><br>"
-                                "If you have lost your account you can contact Microsoft for support."));
-        return;
-#endif
-    }
 
     ChooseOfflineNameDialog dialog(tr("Please enter your desired username to add your offline account."), this);
     if (dialog.exec() != QDialog::Accepted) {
@@ -222,31 +182,6 @@ void AccountListPage::on_actionAddOffline_triggered()
 void AccountListPage::on_actionAddOfflineForced_triggered()
 {
 #ifdef DEVELOPER_MODE_ENABLED
-    // Show developer warning dialog before allowing to proceed
-    auto result = QMessageBox::warning(
-        this,
-        tr("Developer Mode Warning"),
-        tr("<html><head/><body>"
-           "<h2 style='color: red;'>⚠️ DEVELOPER MODE</h2>"
-           "<p>Normally, you must add a Microsoft account that owns Minecraft before you can add an offline account.</p>"
-           "<p><b>You are about to add an offline account without verification.</b></p>"
-           "<p>By proceeding, you confirm that:</p>"
-           "<ul>"
-           "<li>You are a developer testing this launcher</li>"
-           "<li>You have already purchased a legitimate copy of Minecraft</li>"
-           "<li>This build is for testing purposes only</li>"
-           "</ul>"
-           "<p style='color: red;'>If you have not purchased Minecraft, please cancel and delete this launcher.</p>"
-           "</body></html>"
-           "<br><br>"
-           "Do you wish to proceed?"),
-        QMessageBox::Yes | QMessageBox::No,
-        QMessageBox::No
-    );
-
-    if (result != QMessageBox::Yes) {
-        return;
-    }
 
     ChooseOfflineNameDialog dialog(tr("Please enter your desired username to add your offline account."), this);
     if (dialog.exec() != QDialog::Accepted) {
